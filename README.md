@@ -17,3 +17,4 @@ This project uses advanced NLP techniques to extract geospatial entities from te
 - LocationIQ API key
 
 ### Output
+![i2](https://github.com/user-attachments/assets/320097b0-f51d-4acd-ae9d-fe4f802fd75b)
