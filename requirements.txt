@@ -1,3 +1,5 @@
 streamlit
 spacy
-Nominatim
+geopy
+requests
+openai
