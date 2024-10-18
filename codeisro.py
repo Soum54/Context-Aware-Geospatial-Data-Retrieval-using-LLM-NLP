@@ -1,3 +1,4 @@
+import streamlit as st
 import spacy
 import requests
 from geopy.geocoders import Nominatim
@@ -44,31 +45,36 @@ def generate_summary(text, openai_api_key):
         max_tokens=150
     )
     return response.choices[0].message['content'].strip()
-# Example texts from India
-social_media_post = "Floods in Kerala have displaced thousands of people. Relief operations are ongoing."
-news_article = "A cyclone hit the coastal areas of Odisha and West Bengal, causing severe damage to infrastructure and homes."
 
-# Extract entities
-entities_post = extract_entities(social_media_post)
-entities_article = extract_entities(news_article)
+# Streamlit app
+def main():
+    st.title("Geospatial Entity Recognition and Summarization")
 
-# Geocode locations using Location API key
-locationiq_api_key = 'your_location_api_key'  # Replace with your Location API key
-geocoded_post = [(entity[0], geocode_location(entity[0], locationiq_api_key)) for entity in entities_post]
-geocoded_article = [(entity[0], geocode_location(entity[0], locationiq_api_key)) for entity in entities_article]
+    # Input section
+    st.header("Input Text")
+    text = st.text_area("Enter your text here:", height=200)
+    
+    locationiq_api_key = st.text_input("Enter your LocationIQ API Key")
+    openai_api_key = st.text_input("Enter your OpenAI API Key", type="password")
 
-# Print extracted and geocoded entities
-print("Social Media Post Geocoded Entities:", geocoded_post)
-print("News Article Geocoded Entities:", geocoded_article)
+    if st.button("Process"):
+        if text and locationiq_api_key and openai_api_key:
+            # Extract entities
+            entities = extract_entities(text)
+            st.subheader("Extracted Entities")
+            st.write(entities)
 
-# Generate summary using OpenAI GPT-4
-# Replace 'your_openai_api_key' with your actual OpenAI API key
-openai_api_key = 'your_openai_api_key'
-summary_post = generate_summary(social_media_post, openai_api_key)
-summary_article = generate_summary(news_article, openai_api_key)
+            # Geocode locations
+            geocoded_locations = [(entity[0], geocode_location(entity[0], locationiq_api_key)) for entity in entities]
+            st.subheader("Geocoded Locations")
+            st.write(geocoded_locations)
 
-# Print summaries
-print("\nSummary for Social Media Post:")
-print(summary_post)
-print("\nSummary for News Article:")
-print(summary_article)
+            # Generate summary using OpenAI GPT-4
+            summary = generate_summary(text, openai_api_key)
+            st.subheader("Summary")
+            st.write(summary)
+        else:
+            st.error("Please enter text, LocationIQ API key, and OpenAI API key.")
+
+if __name__ == '__main__':
+    main()
