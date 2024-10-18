@@ -5,14 +5,20 @@ from geopy.geocoders import Nominatim
 import openai
 from pathlib import Path
 import subprocess
+from spacy.util import is_package
+
+
+# Define the model name
+model_name = "en_core_web_sm"
 
 # Check if the model is installed, if not, install it
-model_name = "en_core_web_sm"
-if not spacy.util.is_package(model_name):
+try:
+    # Attempt to load the model to check if it's installed
+    nlp = spacy.load(model_name)
+except OSError:
+    # If model isn't installed, download it
     subprocess.run(["python", "-m", "spacy", "download", model_name])
-
-# Load the model
-nlp = spacy.load(model_name)
+    nlp = spacy.load(model_name)
 
 # Initialize geolocators
 nominatim_geolocator = Nominatim(user_agent="geoapiExercises")
