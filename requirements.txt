@@ -3,3 +3,4 @@ spacy
 geopy
 requests
 openai
+en-core-web-sm
