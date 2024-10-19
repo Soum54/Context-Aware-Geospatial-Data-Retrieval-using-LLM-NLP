@@ -1,7 +1,7 @@
 import spacy
 import requests
 from geopy.geocoders import Nominatim
-import openai
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 # Load spaCy model
 nlp = spacy.load("en_core_web_sm")
@@ -32,18 +32,16 @@ def geocode_location(location_name, locationiq_api_key):
             return (data[0]['lat'], data[0]['lon'])
     return None
 
-# Function to use OpenAI's GPT-4 for contextual understanding
-def generate_summary(text, openai_api_key):
-    openai.api_key = openai_api_key
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are an assistant that summarizes geospatial information."},
-            {"role": "user", "content": f"Extract and summarize geospatial information from the following text:\n\n{text}"}
-        ],
-        max_tokens=150
-    )
-    return response.choices[0].message['content'].strip()
+# Load GPT-2 model and tokenizer for summarization
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+model = GPT2LMHeadModel.from_pretrained("gpt2")
+
+# Function to generate summary using GPT-2
+def generate_summary(text):
+    inputs = tokenizer.encode(text, return_tensors="pt", max_length=1024, truncation=True)
+    summary_ids = model.generate(inputs, max_length=150, num_beams=5, no_repeat_ngram_size=2, early_stopping=True)
+    return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+
 # Example texts from India
 social_media_post = "Floods in Kerala have displaced thousands of people. Relief operations are ongoing."
 news_article = "A cyclone hit the coastal areas of Odisha and West Bengal, causing severe damage to infrastructure and homes."
@@ -53,7 +51,7 @@ entities_post = extract_entities(social_media_post)
 entities_article = extract_entities(news_article)
 
 # Geocode locations using Location API key
-locationiq_api_key = 'your_location_api_key'  # Replace with your Location API key
+locationiq_api_key = 'pk.2fc5ca6892cd1d3d7bf7f42bec7f65d1'  # Replace with your Location API key
 geocoded_post = [(entity[0], geocode_location(entity[0], locationiq_api_key)) for entity in entities_post]
 geocoded_article = [(entity[0], geocode_location(entity[0], locationiq_api_key)) for entity in entities_article]
 
@@ -61,11 +59,9 @@ geocoded_article = [(entity[0], geocode_location(entity[0], locationiq_api_key))
 print("Social Media Post Geocoded Entities:", geocoded_post)
 print("News Article Geocoded Entities:", geocoded_article)
 
-# Generate summary using OpenAI GPT-4
-# Replace 'your_openai_api_key' with your actual OpenAI API key
-openai_api_key = 'your_openai_api_key'
-summary_post = generate_summary(social_media_post, openai_api_key)
-summary_article = generate_summary(news_article, openai_api_key)
+# Generate summary using GPT-2
+summary_post = generate_summary(social_media_post)
+summary_article = generate_summary(news_article)
 
 # Print summaries
 print("\nSummary for Social Media Post:")
