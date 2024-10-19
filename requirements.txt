@@ -1,7 +1,0 @@
-streamlit
-spacy==3.6.0
-geopy
-requests
-openai
-
-
