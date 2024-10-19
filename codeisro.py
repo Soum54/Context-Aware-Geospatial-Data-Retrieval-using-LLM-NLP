@@ -51,7 +51,7 @@ entities_post = extract_entities(social_media_post)
 entities_article = extract_entities(news_article)
 
 # Geocode locations using Location API key
-locationiq_api_key = 'pk.2fc5ca6892cd1d3d7bf7f42bec7f65d1'  # Replace with your Location API key
+locationiq_api_key = 'your_location_api_key'  # Replace with your Location API key
 geocoded_post = [(entity[0], geocode_location(entity[0], locationiq_api_key)) for entity in entities_post]
 geocoded_article = [(entity[0], geocode_location(entity[0], locationiq_api_key)) for entity in entities_article]
 
